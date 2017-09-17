@@ -28,7 +28,9 @@ gps = gps[1:]
 latitude_mem = []
 longitude_mem = []
 distribution = table_b.col_values(6)
+distribution = distribution[1:]
 temp = table_b.col_values(7)
+temp = temp[1:]
 
 validation = []
 
@@ -51,8 +53,12 @@ for i in range(len(gps)):
     if (temp_1 > 22 and temp_1 < 24.001):
         latitude_mem.append(temp_1)
         longitude_mem.append(temp_2)
+    else:
+        del(distribution[i])
+        del(temp[i])
 
 for i in range(len(distribution)):
+    print distribution[i], " ", temp[i]
     validation.append([latitude_mem[i], longitude_mem[i], distribution[i] * temp[i] / 10])
 
 
@@ -227,6 +233,19 @@ for point in all_points:
     else:
         other_points.append(point)
 
+al_work = xlwt.Workbook()
+sheet1 = al_work.add_sheet('sheet1', cell_overwrite_ok=True)
+count_sh = 0
+for point in all_points:
+    if point[6]:
+        sheet1.write(count_sh, 0, point[0])
+        sheet1.write(count_sh, 1, point[1])
+        sheet1.write(count_sh, 2, point[4])
+        sheet1.write(count_sh, 3, point[3])
+        count_sh+=1
+        print point[0], " ", point[1], " validation:",  point[4],"price:", point[3]
+
+al_work.save('validation.xls')
 
 for i in range(len(longitude_mem)):
     classify([latitude_mem[i], longitude_mem[i]])
