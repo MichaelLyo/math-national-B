@@ -305,28 +305,8 @@ for value in cluster_list:
     thisAlpha = getAlpha(cluster)
     #print "this cluster's alpha are: ", thisAlpha
 
-    for al_it in thisAlpha:
-        al_sheet.write(al_count, 0, al_it[0])
-        al_sheet.write(al_count, 1, al_it[1])
-        al_count+=1
 
-    sheet1.write(i, 0, cent[0])
-    sheet1.write(i, 1, cent[1])
-    sheet1.write(i, 2, modes)
-    sheet1.write(i, 3, mem_num)
-    # sheet1.write(0,0,start_date,set_style('Times New Roman',220,True))
 
-    # print "central point: ", cent
-    # print "mode is : ", modes
-    # print "member number is : ", mem_num, '\n'
-    #print "\n\naverage price is:", avg
-    # print "all price is:"
-    # for g in range(len(cluster[0])):
-    #     print getPrice(cluster[0][g], cluster[1][g])," ",
-    # print "\nvarience is :", calculateVariance(cluster[0], cluster[1], avg), "  ",
-
-f.save('mode.xls')
-al_work.save('alpha.xls')
 print "\neps is: ", eps, "minPts: ", minPts, "  count is:", count
 
 # plot the noise points as well
@@ -347,29 +327,5 @@ print "noisy points: ", len(noise_points)
 title(str(len(cluster_list)) + " clusters created with eps =" + str(eps) + " Min Points=" + str(
     minPts) + " total points=" + str(len(all_points)) + " noise Points = " + str(len(noise_points)))
 
-#
-# print "failed points' information:"
-# for i in range(len(success)):
-#     if not success[i]:
-#         print "price: ", price[i], " mem density:", all_points[i][4],
-#         if all_points[i][2] != 0:
-#             print "cluster mode: ", getMode(cluster_list[all_points[i][2]][2])
 
 show()
-
-#
-# distWork = xlwt.Workbook()
-# distSheet = distWork.add_sheet('sheet1', cell_overwrite_ok=True)
-#
-# length = len(all_points)
-# count_num = 0
-# for i in range(length):
-#     if i < length - 1:
-#         for j in range(i + 1, length):
-#             distSheet.write(i+j, 0, all_points[i][0])
-#             distSheet.write(i+j, 1, all_points[i][1])
-#             distSheet.write(i+j, 2, dist(all_points[i],all_points[j]))
-#             distSheet.write(i + j, 3, all_points[j][0])
-#             distSheet.write(i + j, 4, all_points[j][1])
-#
-# distWork.save('distance.xls')
