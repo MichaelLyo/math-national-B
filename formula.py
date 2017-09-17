@@ -47,16 +47,6 @@ for i in range(len(gps)):
         latitude_mem.append(temp_1)
         longitude_mem.append(temp_2)
 
-    # if (temp_1 > 22 and temp_1 < 24.001):
-    #     lat.append(temp_1)
-    #     lon.append(temp_2)
-    #     if (reputation[i] <= 19.0):
-    #         lat_2.append(temp_1)
-    #         lon_2.append(temp_2)
-    #     elif (reputation[i] > 19.0):
-    #         lat_3.append(temp_1)
-    #         lon_3.append(temp_2)
-
 
 
 #function to calculate distance
@@ -175,9 +165,8 @@ def package(points,avg_dis):
 
 # take radius = 8 and min. points = 8
 eps = 0.0200000
-minPts = 1
-#eps = 0.1
 minPts = 2
+
 all_points = []
 
 for i in range(len(longitude_task)):
@@ -214,17 +203,6 @@ for point in all_points:
 for i in range(len(longitude_mem)):
     classify([latitude_mem[i], longitude_mem[i]])
 
-mywork = xlwt.Workbook()
-mysheet = mywork.add_sheet(u'sheet1', cell_overwrite_ok=True)
-for j in range(len(all_points)):
-    mysheet.write(j,0,latitude_task[j])
-    mysheet.write(j,1,longitude_task[j])
-    mysheet.write(j,2,price[j])
-    mysheet.write(j,3,success[j])
-    mysheet.write(j,4,len(all_points[j][5]))
-    mysheet.write(j,5,all_points[j][4])
-
-mywork.save('memberNum.xls')
 
 # find border points
 border_points = []

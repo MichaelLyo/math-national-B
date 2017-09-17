@@ -174,10 +174,9 @@ def package(points,avg_dis):
 
 
 # take radius = 8 and min. points = 8
-eps = 0.0200000
+eps = 0.04500000
 minPts = 1
-#eps = 0.1
-minPts = 2
+
 all_points = []
 
 for i in range(len(longitude_task)):
