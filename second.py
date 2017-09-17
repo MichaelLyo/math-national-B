@@ -22,11 +22,16 @@ success = table.col_values(4)
 success = success[1:]
 
 data_b = xlrd.open_workbook('b_new.xlsx')
-table = data_b.sheets()[0]
-gps = table.col_values(1)
+table_b = data_b.sheets()[0]
+gps = table_b.col_values(1)
 gps = gps[1:]
 latitude_mem = []
 longitude_mem = []
+distribution = table_b.col_values(6)
+temp = table_b.col_values(7)
+
+validation = []
+
 for i in range(len(gps)):
     j = 0
     temp_1 = ''
@@ -47,6 +52,8 @@ for i in range(len(gps)):
         latitude_mem.append(temp_1)
         longitude_mem.append(temp_2)
 
+for i in range(len(distribution)):
+    validation.append([latitude_mem[i], longitude_mem[i], distribution[i] * temp[i] / 10])
 
 
 #function to calculate distance
@@ -75,13 +82,13 @@ def getPrice(x, y):
             return item[3]
     return 0
 
-# to judge whether a point is arounded by many members
+# to judge the validation of the members surrounding the point
 def judge(point):
     judge_radius = 0.045
     count = 0
     for i in range(len(latitude_mem)):
         if dist(point, [latitude_mem[i], longitude_mem[i]]) < judge_radius:
-            count += 1
+            count += validation[i][2]
     return count
     pass
 
@@ -185,8 +192,8 @@ def getPackagePrice(cluster_price):
     return result
 
 # take radius = 8 and min. points = 8
-eps = 0.0100000
-minPts = 2
+eps = 0.04500000
+minPts = 1
 
 all_points = []
 
@@ -326,15 +333,6 @@ print "noisy points: ", len(noise_points)
 
 title(str(len(cluster_list)) + " clusters created with eps =" + str(eps) + " Min Points=" + str(
     minPts) + " total points=" + str(len(all_points)) + " noise Points = " + str(len(noise_points)))
-
-
-
-markers = ['b.', 'g.', 'r.', 'y.', 'c.', 'm.', 'k.']
-myMin = getMin(new_all_points[2])
-myMax = getMax(new_all_points[2])
-mytrans = 1/(myMax - myMin)/7
-for count_i in range(len(new_all_points)):
-    plot(new_all_points[count_i][1],new_all_points[count_i][0],markers[count_i%7],alpha=(new_all_points[count_i][2]-myMin)/(myMax - myMin))
 
 
 
