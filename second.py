@@ -3,7 +3,6 @@ import xlwt
 
 from matplotlib.pyplot import *
 from collections import defaultdict
-import random
 
 data_a = xlrd.open_workbook('a.xls')
 table = data_a.sheets()[0]
@@ -67,26 +66,6 @@ def dist(p1, p2):
     return ((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2) ** (0.5)
 
 
-# function to calculate the variance of a group of data
-def calculateVariance(x, y, avg):
-    sum = 0
-    for i in range(len(x)):
-        sum += (getPrice(x[i],y[i]) - avg) ** 2
-    result = (sum / len(x))**(0.5)
-    return result
-
-def avgPrice(x, y):
-    sum = 0
-    for i in range(len(x)):
-        sum += getPrice(x[i],y[i])
-    result = sum / len(x)
-    return result
-
-def getPrice(x, y):
-    for item in all_points:
-        if (x==item[0])&(y==item[1]):
-            return item[3]
-    return 0
 
 # to judge the validation of the members surrounding the point
 def judge(point):
@@ -98,104 +77,6 @@ def judge(point):
     return count
     pass
 
-def classify(mem_point):
-    min_dis = 100
-    for item in all_points:
-        distance_m_p = dist(mem_point,item)
-        if distance_m_p < min_dis:
-            min_dis = distance_m_p
-    for item in all_points:
-        if dist(item, mem_point) == min_dis:
-            item[5].append(mem_point)
-    pass
-
-# get the central point of a group of points
-def getCentral(x, y):
-    sum_x = 0
-    sum_y = 0
-    for i in range(len(x)):
-        sum_x+=x[i]
-        sum_y+=y[i]
-    return [sum_x/len(x), sum_y/len(y)]
-
-# get the mode of a group of points
-def getMode(arr):
-    counts = defaultdict(lambda: 0)
-    for item in arr:
-        counts[item] += 1
-    max_value = 0
-    mode = 0
-    for key in counts:
-        if counts[key]>max_value:
-            max_value=counts[key]
-            mode=key
-    return mode
-
-def getAlpha(cluster):
-    alpha = []
-    mode_num = 0
-    density_amount = 0
-    count_zero=0
-    for j_1 in range(len(cluster[2])):
-        if cluster[2][j_1] == cluster[6]:
-            mode_num += 1
-            density_amount += cluster[3][j_1]
-    density_avg = density_amount/mode_num
-    for i_1 in range(len(cluster[2])):
-        if cluster[2][i_1] != cluster[6]:
-            factor = float(cluster[3][i_1]) / density_avg
-            #print "factor:",factor, "price: ", cluster[2][i_1], "mode: ", cluster[5], "density:",cluster[3][i_1]
-            if(factor!=0):
-                newItem = (cluster[2][i_1] - cluster[6]) / factor
-                alpha.append([newItem, cluster[5][i_1]])
-            else:
-                count_zero+=1
-    #print "zero have ", count_zero
-    return alpha
-
-
-# calculate distance
-def calAvgDis(points):
-    sum = 0
-    length = len(points)
-    count_num = 0
-    for count_cal in range(length):
-        if count_cal< length - 1:
-            for j_cal in range(count_cal+1,length):
-                sum += dist(points[count_cal],points[j_cal])
-                count_num += 1
-    return sum/count_num
-
-def package(points,avg_dis):
-    length = len(points)
-    packages = []
-    for count_cal in range(length):
-        if count_cal < length - 1:
-            for j_cal in range(count_cal + 1, length):
-                if dist(points[count_cal], points[j_cal])<avg_dis:
-                    packages.append()
-def getMax(arr):
-    max = 0
-    for item in arr:
-        if item > max:
-            max = item
-    return max
-
-def getMin(arr):
-    min = 10000
-    for item in arr:
-        if item < min:
-            min = item
-    return min
-
-def getPackagePrice(cluster_price):
-    min_p = getMin(cluster_price)
-    max_p = getMax(cluster_price)
-    sum = 0
-    for item in cluster_price:
-        sum += item/max_p
-    result = (sum*min_p)/len(cluster_price)
-    return result
 
 # take radius = 8 and min. points = 8
 eps = 0.04500000
@@ -233,23 +114,51 @@ for point in all_points:
     else:
         other_points.append(point)
 
+def getS_price(start, end, arr):
+    mydict = defaultdict(lambda:0)
+    for item in arr:
+        if (item[4] < end) & (item[4] > start):
+            mydict[item[3]] += 1
+    maxK = 0
+    key_m = 0
+    for key in mydict:
+        if mydict[key]>maxK:
+            maxK = mydict[key]
+            key_m=key
+    return key_m
+
+
 al_work = xlwt.Workbook()
 sheet1 = al_work.add_sheet('sheet1', cell_overwrite_ok=True)
 count_sh = 0
+
+succ_arr = []
+for item in all_points:
+    if item[6]:
+        succ_arr.append(item)
+
 for point in all_points:
-    if point[6]:
-        sheet1.write(count_sh, 0, point[0])
-        sheet1.write(count_sh, 1, point[1])
-        sheet1.write(count_sh, 2, point[4])
-        sheet1.write(count_sh, 3, point[3])
-        count_sh+=1
+    sheet1.write(count_sh, 0, point[0])
+    sheet1.write(count_sh, 1, point[1])
+    sheet1.write(count_sh, 2, point[4])
+    sheet1.write(count_sh, 3, point[3])
+    standard_start = point[4]
+    if not point[6]:
+
+        stand_factor = 0
+        modified_price = getS_price(standard_start-stand_factor, standard_start+1+stand_factor, succ_arr)
+        while((modified_price<=point[3])&(stand_factor<100)):
+            stand_factor+=1
+            modified_price = getS_price(standard_start - stand_factor, standard_start + 1 + stand_factor, succ_arr)
+        if(modified_price<point[3]):
+            modified_price=point[3]
+        sheet1.write(count_sh, 4, modified_price)
         print point[0], " ", point[1], " validation:",  point[4],"price:", point[3]
+    else:
+        sheet1.write(count_sh, 4, point[3])
+    count_sh += 1
 
-al_work.save('validation.xls')
-
-for i in range(len(longitude_mem)):
-    classify([latitude_mem[i], longitude_mem[i]])
-
+al_work.save('problem2.xls')
 
 # find border points
 border_points = []
@@ -285,11 +194,6 @@ for point in plotted_points:
     cluster_list[point[2]][4].append(len(point[5]))  # the number of members around the point
     cluster_list[point[2]][5].append(point[6])
 
-markers = [[0 for col in range(4)] for row in range(7)]
-markers[0] = ['b.', 'g.', 'r.', 'c.', 'm.', 'y.', 'k.']
-markers[1] = ['b*', 'g*', 'r*', 'c*', 'm*', 'y*', 'k*']
-markers[2] = ['b^', 'g^', 'r^', 'c^', 'm^', 'y^', 'k^']
-markers[3] = ['b<', 'g<', 'r<', 'c<', 'm<', 'y<', 'k<']
 
 # plotting the clusters
 i = 0
@@ -299,19 +203,8 @@ transparency = 1.0/(cluster_num/7.0)
 
 new_all_points = []
 
-#print cluster_list
 for value in cluster_list:
     cluster = cluster_list[value]
-    print "cluster count:", len(cluster[0])
-    # print "cluster x is :", cluster[0]
-    # print "cluster y is :", cluster[1]
-
-    #plot(cluster[1], cluster[0], markers[0][i % 7], alpha=transparency*(random.randint(1, (cluster_num/7))))
-    # for x in range(len(cluster[0])):
-    #     sign = (cluster[3][x]/3)%4
-    #     plot(cluster[1][x],cluster[0][x],markers[sign][i%7])
-    # print "my point:",cluster[0],cluster[1]
-    # plot(cluster[0], cluster[1], 'ro')
     i = (i + 1)
 
     mem_num = 0
@@ -320,19 +213,7 @@ for value in cluster_list:
         mem_num += item
 
     count += 1
-    avg = avgPrice(cluster[0], cluster[1])
-    cent = getCentral(cluster[0], cluster[1])
-    modes = getMode(cluster[2])
 
-    cluster.append(modes)
-    thisAlpha = getAlpha(cluster)
-
-    #print "this cluster's alpha are: ", thisAlpha
-    central = getCentral(cluster[0], cluster[1])
-    new_all_points.append([central[0], central[1], getPackagePrice(cluster[2])])
-
-
-print "\neps is: ", eps, "minPts: ", minPts, "  count is:", count
 
 # plot the noise points as well
 noise_points = []
@@ -346,14 +227,7 @@ for point in noise_points:
     noisey.append(point[1])
     new_all_points.append([point[0], point[1], point[3]])
 #plot(noisey, noisex, "x")
-print "noisy points: ", len(noise_points)
-
-#plot(latitude_mem, longitude_mem, 'y+')
-
-title(str(len(cluster_list)) + " clusters created with eps =" + str(eps) + " Min Points=" + str(
-    minPts) + " total points=" + str(len(all_points)) + " noise Points = " + str(len(noise_points)))
 
 
 
-
-show()
+#show()
